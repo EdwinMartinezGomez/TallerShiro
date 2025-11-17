@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios Registrados - TallerShiro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        header h1 {
+            font-size: 28px;
+        }
+        
+        .header-user {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .info-box {
+            background: #cfe2ff;
+            border-left: 4px solid #0d6efd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #084298;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .users-table th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+            color: #555;
+        }
+        
+        .users-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .users-table tr:hover {
+            background: #f8f9ff;
+        }
+        
+        .hash-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            word-break: break-all;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            max-width: 400px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .algorithm-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .role-admin {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .role-user {
+            background: #cfe2ff;
+            color: #084298;
+        }
+        
+        .role-vendedor {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-active {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .status-inactive {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .no-data h3 {
+            margin-bottom: 10px;
+        }
+        
+        .expandable-header {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .expandable-header:hover {
+            background: #e9ecef;
+        }
+        
+        .expandable-content {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .expandable-content.show {
+            display: block;
+        }
+        
+        .arrow {
+            transition: transform 0.3s;
+        }
+        
+        .arrow.open {
+            transform: rotate(90deg);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>👥 Usuarios Registrados</h1>
+                <p style="margin-top: 5px; font-size: 14px;">Base de datos de usuarios con hashing de contraseñas</p>
+            </div>
+            <div class="header-user">
+                <strong>Usuario Actual:</strong> <span th:text="${currentUser}"></span>
+            </div>
+            <div class="btn-group">
+                <a href="/products/list" class="btn btn-secondary">← Volver</a>
+                <a href="/logout" class="btn btn-danger">Logout</a>
+            </div>
+        </header>
+        
+        <div class="section">
+            <h2>📊 Listado de Usuarios</h2>
+            
+            <div class="info-box">
+                <strong>ℹ️ Información:</strong> Esta página muestra todos los usuarios registrados en el sistema con sus respectivos hashes de contraseña. 
+                Los hashes son <strong>irreversibles</strong>, lo que significa que las contraseñas originales no pueden recuperarse.
+            </div>
+            
+            <div th:if="${users.isEmpty()}" class="no-data">
+                <h3>No hay usuarios registrados</h3>
+                <p>El sistema aún no tiene usuarios. <a href="/register">Regístrate aquí</a></p>
+            </div>
+            
+            <div th:if="${!users.isEmpty()}">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th width="20%">Usuario</th>
+                            <th width="25%">Algoritmo</th>
+                            <th width="40%">Hash de Contraseña</th>
+                            <th width="10%">Estado</th>
+                            <th width="5%">Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td>
+                                <strong th:text="${user.username}"></strong>
+                            </td>
+                            
+                            <td>
+                                <span class="algorithm-badge" th:text="${user.hashAlgorithm}"></span>
+                            </td>
+                            <td>
+                                <div class="hash-cell" th:text="${user.passwordHash}"></div>
+                            </td>
+                            <td>
+                                <span th:class="${user.isActive()} ? 'status-active' : 'status-inactive'" 
+                                      th:text="${user.isActive()} ? '✓ Activo' : '✗ Inactivo'"></span>
+                            </td>
+                            <td>
+                                <button class="expandable-toggle" th:data-id="${user.id}" onclick="toggleDetails(this)" 
+                                        style="background: none; border: none; cursor: pointer; font-size: 16px;">
+                                    ▶
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Detalles expandibles de cada usuario -->
+                <div th:each="user : ${users}" th:id="'details-' + ${user.id}" class="expandable-content">
+                    <div style="margin-bottom: 10px;">
+                        <strong>Usuario:</strong> <span th:text="${user.username}"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Email:</strong> <span th:text="${user.email}"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Nombre Completo:</strong> <span th:text="${user.fullName}"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Algoritmo de Hash:</strong> <span th:text="${user.hashAlgorithm}"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Hash Completo:</strong>
+                        <div style="background: white; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 11px; word-break: break-all; max-height: 150px; overflow-y: auto;" 
+                             th:text="${user.passwordHash}"></div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Creado el:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Actualizado el:</strong> <span th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                <h3 style="color: #667eea; margin-bottom: 15px;">📈 Estadísticas</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #667eea;" th:text="${users.size()}"></div>
+                        <div style="color: #666; margin-top: 5px;">Total de Usuarios</div>
+                    </div>
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #28a745;" 
+                             th:text="${#lists.size(users.?[active == true])}"></div>
+                        <div style="color: #666; margin-top: 5px;">Usuarios Activos</div>
+                    </div>
+                    <div style="background: #f8f9ff; padding: 15px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: bold; color: #667eea;">BCrypt</div>
+                        <div style="color: #666; margin-top: 5px;">Algoritmo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>🔐 Sistema de Autenticación Segura - TallerShiro 2024</p>
+        </footer>
+    </div>
+    
+    <script>
+        function toggleDetails(btn) {
+            const row = btn.closest('tr');
+            const userId = btn.getAttribute('data-id');
+            const details = document.getElementById('details-' + userId);
+            
+            if (details) {
+                details.classList.toggle('show');
+                btn.classList.toggle('open');
+                btn.style.transform = btn.classList.contains('open') ? 'rotate(90deg)' : 'rotate(0deg)';
+            }
+        }
+    </script>
+</body>
+</html>
+
