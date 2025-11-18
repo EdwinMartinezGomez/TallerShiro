@@ -6,6 +6,9 @@
     <link rel="stylesheet" th:href="@{/css/style.css}" />
 </head>
 <body>
+<div style="text-align:right; margin:10px;">
+    <a th:href="@{/logout}" class="btn">Logout</a>
+</div>
 <h2>Información de la sesión</h2>
 <div th:if="${message}">
     <p th:text="${message}"></p>

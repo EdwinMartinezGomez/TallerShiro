@@ -36,6 +36,9 @@ public class User {
     @Column(length = 100)
     private String fullName;
 
+    @Column(length = 50)
+    private String role;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -109,6 +112,14 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     // Additional methods

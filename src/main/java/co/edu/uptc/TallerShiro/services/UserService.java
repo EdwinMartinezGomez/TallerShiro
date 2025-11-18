@@ -15,6 +15,11 @@ public interface UserService {
     User registerUser(String username, String password, String email, String fullName);
 
     /**
+     * Register user with explicit role (admin, seller, user)
+     */
+    User registerUserWithRole(String username, String password, String email, String fullName, String role);
+
+    /**
      * Autentica un usuario
      */
     boolean authenticateUser(String username, String password);

@@ -25,6 +25,8 @@ public class ProductController {
         Subject currentUser = SecurityUtils.getSubject();
         model.addAttribute("products", service.listAll());
         model.addAttribute("currentUser", currentUser.getPrincipal());
+        model.addAttribute("isAuthenticated", currentUser.isAuthenticated());
+        model.addAttribute("isAdmin", currentUser.hasRole("admin"));
         return "products/list";
     }
 
@@ -66,6 +68,8 @@ public class ProductController {
         Product p = service.getById(id).orElse(null);
         model.addAttribute("product", p);
         model.addAttribute("currentUser", currentUser.getPrincipal());
+        model.addAttribute("isAuthenticated", currentUser.isAuthenticated());
+        model.addAttribute("isAdmin", currentUser.hasRole("admin"));
         return "products/details";
     }
 }

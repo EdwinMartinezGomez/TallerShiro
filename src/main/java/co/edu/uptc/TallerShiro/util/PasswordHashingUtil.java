@@ -38,7 +38,14 @@ public class PasswordHashingUtil {
      * @return hash de la contraseña en formato string
      */
     public static String hashWithBCrypt(String password) {
-        byte[] hashedPassword = BCrypt.withDefaults().hash(12, password.toCharArray());
+        return hashWithBCrypt(password, 12);
+    }
+
+    /**
+     * BCrypt with configurable cost (log rounds)
+     */
+    public static String hashWithBCrypt(String password, int cost) {
+        byte[] hashedPassword = BCrypt.withDefaults().hash(cost, password.toCharArray());
         return new String(hashedPassword);
     }
 
@@ -62,8 +69,16 @@ public class PasswordHashingUtil {
      * @return hash de la contraseña
      */
     public static String hashWithArgon2(String password) {
+        // default recommended parameters
+        return hashWithArgon2(password, 2, 65536, 1);
+    }
+
+    /**
+     * Argon2 with configurable iterations, memory (KB) and parallelism
+     */
+    public static String hashWithArgon2(String password, int iterations, int memoryKb, int parallelism) {
         Argon2 argon2 = Argon2Factory.create();
-        return argon2.hash(2, 65536, 1, password.toCharArray());
+        return argon2.hash(iterations, memoryKb, parallelism, password.toCharArray());
     }
 
     /**
@@ -90,7 +105,11 @@ public class PasswordHashingUtil {
      * @return hash de la contraseña
      */
     public static String hashWithSpringBCrypt(String password) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder(12);
+        return hashWithSpringBCrypt(password, 12);
+    }
+
+    public static String hashWithSpringBCrypt(String password, int strength) {
+        PasswordEncoder encoder = new BCryptPasswordEncoder(strength);
         return encoder.encode(password);
     }
 
@@ -210,6 +229,54 @@ public class PasswordHashingUtil {
         }
         
         return new PasswordHash(hash, algorithm);
+    }
+
+    /**
+     * Measures how long (milliseconds) it takes to hash the given password
+     * using the specified algorithm and parameters. Useful to compare weak vs strong.
+     */
+    public static long measureHashTimeMillis(String password, HashingAlgorithm algorithm, Object... params) {
+        long start = System.nanoTime();
+        switch (algorithm) {
+            case BCRYPT:
+                int cost = params.length > 0 && params[0] instanceof Integer ? (Integer) params[0] : 12;
+                hashWithBCrypt(password, cost);
+                break;
+            case ARGON2:
+                int iterations = params.length > 0 && params[0] instanceof Integer ? (Integer) params[0] : 2;
+                int memoryKb = params.length > 1 && params[1] instanceof Integer ? (Integer) params[1] : 65536;
+                int parallelism = params.length > 2 && params[2] instanceof Integer ? (Integer) params[2] : 1;
+                hashWithArgon2(password, iterations, memoryKb, parallelism);
+                break;
+            case SPRING_BCRYPT:
+                int strength = params.length > 0 && params[0] instanceof Integer ? (Integer) params[0] : 12;
+                hashWithSpringBCrypt(password, strength);
+                break;
+            case SHA512_SALTED:
+                hashWithSHA512Salted(password, null);
+                break;
+            default:
+                throw new IllegalArgumentException("Algoritmo no soportado: " + algorithm);
+        }
+        long end = System.nanoTime();
+        return (end - start) / 1_000_000;
+    }
+
+    /**
+     * Compare a weak and a strong hashing configuration and return a short report.
+     */
+    public static String compareWeakVsStrong(String password) {
+        // Weak: SHA-512 salted (fast)
+        long weakMs = measureHashTimeMillis(password, HashingAlgorithm.SHA512_SALTED);
+
+        // Strong: Argon2 moderate params
+        long strongMs = measureHashTimeMillis(password, HashingAlgorithm.ARGON2, 3, 131072, 1);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Weak (SHA-512 salted) time: ").append(weakMs).append(" ms\n");
+        sb.append("Strong (Argon2: iter=3, mem=128MB) time: ").append(strongMs).append(" ms\n");
+        sb.append("Recommendation: use Argon2 or bcrypt with high cost for production.\n");
+        return sb.toString();
     }
 
     /**

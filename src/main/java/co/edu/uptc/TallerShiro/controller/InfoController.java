@@ -46,6 +46,7 @@ public class InfoController {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
         model.addAttribute("currentUser", currentUser.getPrincipal());
+        model.addAttribute("isAdmin", currentUser.hasRole("admin"));
 
         return "users-list";
     }

@@ -10,6 +10,7 @@ import org.apache.shiro.subject.Subject;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -139,11 +140,26 @@ public class AuthenticationController {
      * Muestra la página de registro
      */
     @GetMapping("/register")
-    public String showRegisterPage() {
+    public String showRegisterPage(@RequestParam(name = "role", required = false) String role, Model model) {
         Subject currentUser = SecurityUtils.getSubject();
-        if (currentUser.isAuthenticated()) {
+        if (currentUser.isAuthenticated() && (role == null || !"admin".equalsIgnoreCase(role))) {
+            // authenticated users should not use the public register unless creating admin (handled separately)
             return "redirect:/products/list";
         }
+        model.addAttribute("preRole", role);
+        model.addAttribute("allowAdmin", currentUser != null && currentUser.hasRole("admin"));
+        return "register";
+    }
+
+    @GetMapping("/register-as")
+    public String showRegisterWithRole(@RequestParam(name = "role", required = false) String role, Model model) {
+        Subject currentUser = SecurityUtils.getSubject();
+        // If the requested role is admin, only allow if current user is admin
+        if ("admin".equalsIgnoreCase(role) && (currentUser == null || !currentUser.hasRole("admin"))) {
+            return "redirect:/login";
+        }
+        model.addAttribute("preRole", role);
+        model.addAttribute("allowAdmin", currentUser != null && currentUser.hasRole("admin"));
         return "register";
     }
 
@@ -156,6 +172,7 @@ public class AuthenticationController {
                           @RequestParam String passwordConfirm,
                           @RequestParam String email,
                           @RequestParam String fullName,
+                          @RequestParam(name = "role", required = false) String role,
                           RedirectAttributes redirectAttributes) {
         try {
             // Validaciones
@@ -184,8 +201,18 @@ public class AuthenticationController {
                 return "redirect:/register";
             }
 
-            // Registrar el usuario (el rol por defecto se maneja dentro del servicio)
-            userService.registerUser(username, password, email, fullName);
+            // Registrar el usuario: si se pide un rol explícito y el current subject
+            // es admin, permitir crear con ese rol; en otros casos usar el rol por defecto
+            Subject currentUser = SecurityUtils.getSubject();
+            if (role != null && !role.isBlank()) {
+                if ("admin".equalsIgnoreCase(role) && (currentUser == null || !currentUser.hasRole("admin"))) {
+                    redirectAttributes.addFlashAttribute("error", "No tiene permiso para crear administradores");
+                    return "redirect:/register";
+                }
+                userService.registerUserWithRole(username, password, email, fullName, role);
+            } else {
+                userService.registerUser(username, password, email, fullName);
+            }
 
             redirectAttributes.addFlashAttribute("success", 
                 "Registro exitoso. Bienvenido " + username + "! Inicia sesión ahora.");

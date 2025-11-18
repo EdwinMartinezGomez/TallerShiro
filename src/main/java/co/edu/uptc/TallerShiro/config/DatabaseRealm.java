@@ -49,14 +49,25 @@ public class DatabaseRealm extends AuthorizingRealm {
         // Roles: admin, seller, user
         // Permisos: product:create, product:read, product:update, product:delete, user:view, user:manage, session:view
 
-        // Mapear usuarios a roles (se puede reemplazar por tablas en BD si se desea)
+        // Mapear usuarios a roles (tomando el rol guardado en la entidad User si existe)
         Set<String> userRoles = new HashSet<>();
-        if ("admin".equalsIgnoreCase(username)) {
-            userRoles.add("admin");
-        } else if ("vendedor".equalsIgnoreCase(username) || "seller".equalsIgnoreCase(username)) {
-            userRoles.add("seller");
+        String roleFromDb = null;
+        try {
+            roleFromDb = userOpt.get().getRole();
+        } catch (Exception ignored) {
+        }
+
+        if (roleFromDb != null && !roleFromDb.isBlank()) {
+            userRoles.add(roleFromDb.toLowerCase());
         } else {
-            userRoles.add("user");
+            // Fallback: heurística por username
+            if ("admin".equalsIgnoreCase(username)) {
+                userRoles.add("admin");
+            } else if ("vendedor".equalsIgnoreCase(username) || "seller".equalsIgnoreCase(username)) {
+                userRoles.add("seller");
+            } else {
+                userRoles.add("user");
+            }
         }
 
         // Asignar roles

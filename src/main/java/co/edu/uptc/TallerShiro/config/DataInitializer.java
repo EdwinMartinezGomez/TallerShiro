@@ -36,6 +36,7 @@ public class DataInitializer {
             // no roles
             admin.setEmail("admin@tallershiro.com");
             admin.setFullName("Administrador del Sistema");
+            admin.setRole("admin");
             admin.setActive(true);
             userRepository.save(admin);
             printUserInfo("admin", "admin123", adminHash);
@@ -52,6 +53,7 @@ public class DataInitializer {
             // no roles
             vendedor.setEmail("vendedor@tallershiro.com");
             vendedor.setFullName("Juan Vendedor García");
+            vendedor.setRole("seller");
             vendedor.setActive(true);
             userRepository.save(vendedor);
             printUserInfo("vendedor", "vendedor123", vendedorHash);
@@ -68,6 +70,7 @@ public class DataInitializer {
             // no roles
             user1.setEmail("user1@tallershiro.com");
             user1.setFullName("María Usuario Rodríguez");
+            user1.setRole("user");
             user1.setActive(true);
             userRepository.save(user1);
             printUserInfo("user1", "password123", user1Hash);
@@ -84,6 +87,7 @@ public class DataInitializer {
             // no roles
             user2.setEmail("user2@tallershiro.com");
             user2.setFullName("Carlos Usuario López");
+            user2.setRole("user");
             user2.setActive(true);
             userRepository.save(user2);
             printUserInfo("user2", "password456", user2Hash);

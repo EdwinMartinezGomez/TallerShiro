@@ -8,6 +8,9 @@
 <body>
 <div class="container">
     <h1>Detalle producto</h1>
+    <div style="text-align:right; margin-bottom:10px;">
+        <a class="btn" th:href="@{/logout}">Logout</a>
+    </div>
     <div th:if="${product} == null">Producto no encontrado.</div>
     <div th:if="${product} != null">
         <p><strong>ID:</strong> <span th:text="${product.id}"></span></p>

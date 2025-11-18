@@ -8,7 +8,14 @@
 </head>
 <body>
 <div class="container">
-    <h1>Productos</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>Productos</h1>
+        <div>
+            <a th:if="${isAdmin}" class="btn" th:href="@{/info/users}">Administrar usuarios</a>
+            <a th:if="${isAdmin}" class="btn" th:href="@{/register-as(role='admin')}">Registrar administrador</a>
+            <a class="btn" th:href="@{/logout}">Salir</a>
+        </div>
+    </div>
     <a class="btn" th:href="@{/products/new}">Crear producto</a>
     <table>
         <thead>

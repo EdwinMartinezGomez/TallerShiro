@@ -51,9 +51,17 @@ public class UserServiceImpl implements UserService {
         user.setEmail(email);
         user.setFullName(fullName);
         user.setActive(true);
-        // no roles field anymore
-        user.setActive(true);
+        // default role = user
+        user.setRole("user");
 
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User registerUserWithRole(String username, String password, String email, String fullName, String role) {
+        // Reuse registerUser validations and hashing
+        User user = registerUser(username, password, email, fullName);
+        user.setRole(role == null ? "user" : role);
         return userRepository.save(user);
     }
 
