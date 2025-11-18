@@ -4,6 +4,7 @@ import co.edu.uptc.TallerShiro.model.Product;
 import co.edu.uptc.TallerShiro.services.ProductService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ public class ProductController {
     }
 
     @GetMapping({"/", "/list"})
+    @RequiresPermissions("product:read")
     public String list(Model model) {
         Subject currentUser = SecurityUtils.getSubject();
         model.addAttribute("products", service.listAll());
@@ -27,6 +29,7 @@ public class ProductController {
     }
 
     @GetMapping("/new")
+    @RequiresPermissions("product:create")
     public String createForm(Model model) {
         model.addAttribute("product", new Product());
         model.addAttribute("isNew", true);
@@ -34,12 +37,14 @@ public class ProductController {
     }
 
     @PostMapping
+    @RequiresPermissions("product:create")
     public String save(@ModelAttribute Product product) {
         service.save(product);
         return "redirect:/products/list";
     }
 
     @GetMapping("/edit/{id}")
+    @RequiresPermissions("product:update")
     public String editForm(@PathVariable Long id, Model model) {
         Product p = service.getById(id).orElse(new Product());
         model.addAttribute("product", p);
@@ -48,12 +53,14 @@ public class ProductController {
     }
 
     @GetMapping("/delete/{id}")
+    @RequiresPermissions("product:delete")
     public String delete(@PathVariable Long id) {
         service.delete(id);
         return "redirect:/products/list";
     }
 
     @GetMapping("/{id}")
+    @RequiresPermissions("product:read")
     public String details(@PathVariable Long id, Model model) {
         Subject currentUser = SecurityUtils.getSubject();
         Product p = service.getById(id).orElse(null);

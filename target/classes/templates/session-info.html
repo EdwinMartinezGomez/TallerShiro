@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Session Info</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<h2>Información de la sesión</h2>
+<div th:if="${message}">
+    <p th:text="${message}"></p>
+</div>
+<div th:unless="${message}">
+    <ul>
+        <li><strong>ID:</strong> <span th:text="${sessionId}"></span></li>
+        <li><strong>Creación:</strong> <span th:text="${creationTime}"></span></li>
+        <li><strong>Último acceso:</strong> <span th:text="${lastAccessTime}"></span></li>
+        <li><strong>Timeout (ms):</strong> <span th:text="${timeout}"></span></li>
+        <li><strong>Usuario:</strong> <span th:text="${principal}"></span></li>
+    </ul>
+</div>
+<p><a th:href="@{/products/list}">Volver a productos</a></p>
+</body>
+</html>

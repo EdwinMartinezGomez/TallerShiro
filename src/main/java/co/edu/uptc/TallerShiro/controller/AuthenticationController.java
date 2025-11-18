@@ -95,16 +95,32 @@ public class AuthenticationController {
                 return "redirect:/login";
             }
 
+            // Ensure servlet HTTP session exists before login so the container will issue a
+            // JSESSIONID and Shiro's ServletContainerSessionManager can associate the
+            // Subject with the HttpSession during login processing.
+            var httpSession = request.getSession(true);
+            System.out.println("[Auth] HttpSession id (pre-login): " + httpSession.getId());
+
             // Crea un token con las credenciales
             UsernamePasswordToken token = new UsernamePasswordToken(username, password);
-            token.setRememberMe(true);
-            
+            // Do not set rememberMe here to avoid remember-only identity which may cause
+            // authorization checks to see an anonymous/remembered subject without a session.
+            token.setRememberMe(false);
 
             // Intenta autenticar con Shiro
             currentUser.login(token);
 
-            // Asegurar que exista una sesión HTTP para que JSESSIONID se envíe al cliente
-            var httpSession = request.getSession(true);
+            // After login, log diagnostic info. Avoid calling Subject.getSession(true)
+            // because if Shiro is not using an HTTP-compatible SessionContext it throws.
+            try {
+                System.out.println("[Auth] Subject principal: " + currentUser.getPrincipal());
+                System.out.println("[Auth] isAuthenticated: " + currentUser.isAuthenticated());
+            } catch (Exception ex) {
+                System.out.println("[Auth] Diagnostic logging failed: " + ex.getMessage());
+            }
+
+            // Store username in servlet session for convenience
+            System.out.println("[Auth] HttpSession id (post-login): " + httpSession.getId());
             httpSession.setAttribute("username", username);
             
             redirectAttributes.addFlashAttribute("success", "¡Bienvenido, " + username + "!");
@@ -188,12 +204,29 @@ public class AuthenticationController {
      * Realiza el logout del usuario
      */
     @GetMapping("/logout")
-    public String logout(RedirectAttributes redirectAttributes) {
+    public String logout(RedirectAttributes redirectAttributes, HttpServletRequest request) {
         Subject currentUser = SecurityUtils.getSubject();
-        if (currentUser.isAuthenticated()) {
-            currentUser.logout();
-            redirectAttributes.addFlashAttribute("success", "Sesión cerrada correctamente");
+        try {
+            if (currentUser.isAuthenticated()) {
+                currentUser.logout();
+            }
+        } catch (Exception e) {
+            // ignore logout exceptions but log if needed
         }
+
+        // Also invalidate the servlet session and remove the username attribute so
+        // SessionSubjectFilter cannot recreate an authenticated Subject from it.
+        try {
+            var session = request.getSession(false);
+            if (session != null) {
+                session.removeAttribute("username");
+                session.invalidate();
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+
+        redirectAttributes.addFlashAttribute("success", "Sesión cerrada correctamente");
         return "redirect:/login";
     }
 

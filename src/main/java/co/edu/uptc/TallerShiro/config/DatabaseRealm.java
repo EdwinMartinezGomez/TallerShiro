@@ -45,6 +45,52 @@ public class DatabaseRealm extends AuthorizingRealm {
         // Crear la información de autorización
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
 
+        // Definición de roles y permisos (simple mapeo en memoria para la demo)
+        // Roles: admin, seller, user
+        // Permisos: product:create, product:read, product:update, product:delete, user:view, user:manage, session:view
+
+        // Mapear usuarios a roles (se puede reemplazar por tablas en BD si se desea)
+        Set<String> userRoles = new HashSet<>();
+        if ("admin".equalsIgnoreCase(username)) {
+            userRoles.add("admin");
+        } else if ("vendedor".equalsIgnoreCase(username) || "seller".equalsIgnoreCase(username)) {
+            userRoles.add("seller");
+        } else {
+            userRoles.add("user");
+        }
+
+        // Asignar roles
+        info.setRoles(userRoles);
+
+        // Mapear roles a permisos
+        Set<String> permissions = new HashSet<>();
+        for (String role : userRoles) {
+            switch (role) {
+                case "admin":
+                    permissions.add("product:create");
+                    permissions.add("product:read");
+                    permissions.add("product:update");
+                    permissions.add("product:delete");
+                    permissions.add("user:view");
+                    permissions.add("user:manage");
+                    permissions.add("session:view");
+                    break;
+                case "seller":
+                    permissions.add("product:create");
+                    permissions.add("product:read");
+                    permissions.add("product:update");
+                    permissions.add("session:view");
+                    break;
+                case "user":
+                    permissions.add("product:read");
+                    permissions.add("session:view");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        info.setStringPermissions(permissions);
 
         return info;
     }
