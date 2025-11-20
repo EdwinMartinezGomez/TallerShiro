@@ -1,46 +1,74 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8" />
     <title>Productos</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
+
 <body>
-<div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Productos</h1>
-        <div>
-            <a th:if="${isAdmin}" class="btn" th:href="@{/info/users}">Administrar usuarios</a>
-            <a th:if="${isAdmin}" class="btn" th:href="@{/register-as(role='admin')}">Registrar administrador</a>
-            <a class="btn" th:href="@{/logout}">Salir</a>
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Productos</h1>
+                <p style="color: var(--text-secondary);">Gestiona el inventario de productos</p>
+            </div>
+            <div class="header-actions">
+                <a th:if="${isAdmin}" class="btn btn-secondary" th:href="@{/info/users}">Administrar usuarios</a>
+                <a th:if="${isAdmin}" class="btn btn-secondary" th:href="@{/register-as(role='admin')}">Registrar
+                    admin</a>
+                <a class="btn btn-danger" th:href="@{/logout}">Salir</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="font-size: 1.25rem; margin: 0;">Listado</h2>
+                <a class="btn btn-primary" th:href="@{/products/new}">+ Nuevo Producto</a>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${products}">
+                            <td th:text="${p.id}" style="color: var(--text-secondary);"></td>
+                            <td th:text="${p.name}" style="font-weight: 500;"></td>
+                            <td th:text="${p.description}"></td>
+                            <td th:text="${'$' + p.price}"></td>
+                            <td style="text-align: right;">
+                                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                                    <a th:href="@{'/products/' + ${p.id}}" class="btn btn-secondary"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Ver</a>
+                                    <a th:href="@{'/products/edit/' + ${p.id}}" class="btn btn-secondary"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Editar</a>
+                                    <a th:href="@{'/products/delete/' + ${p.id}}"
+                                        onclick="return confirm('¿Estás seguro de eliminar este producto?');"
+                                        class="btn btn-danger"
+                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Eliminar</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(products)}">
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                No hay productos registrados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <a class="btn" th:href="@{/products/new}">Crear producto</a>
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="p : ${products}">
-            <td th:text="${p.id}"></td>
-            <td th:text="${p.name}"></td>
-            <td th:text="${p.description}"></td>
-            <td th:text="${p.price}"></td>
-            <td>
-                <a th:href="@{'/products/' + ${p.id}}">Ver</a>
-                <a th:href="@{'/products/edit/' + ${p.id}}">Editar</a>
-                <a th:href="@{'/products/delete/' + ${p.id}}" onclick="return confirm('Eliminar?');">Eliminar</a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
 </body>
+
 </html>

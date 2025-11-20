@@ -12,6 +12,7 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.util.ThreadContext;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -23,11 +24,12 @@ import java.io.IOException;
  * filter is not available or when the Subject wasn't persisted automatically.
  */
 @Component
-@Order(1)
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class SessionSubjectFilter implements Filter {
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpSession session = req.getSession(false);
 
